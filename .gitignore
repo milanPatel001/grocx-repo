@@ -2,6 +2,7 @@
 
 # dependencies
 node_modules/
+.gitignore
 
 # Expo
 .expo/
@@ -30,6 +31,8 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env
 
 # typescript
 *.tsbuildinfo
+authStateListener.js
