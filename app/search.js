@@ -7,6 +7,7 @@ import {
   ArrowLeftIcon,
   XMarkIcon,
   ArrowUpLeftIcon,
+  MagnifyingGlassIcon,
 } from "react-native-heroicons/outline";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { collection, query, where, getDocs } from "firebase/firestore";
@@ -46,12 +47,13 @@ export default function Search() {
         </TouchableOpacity>
 
         <TextInput
-          placeholder="What can we help you find ...."
+          placeholder="Type here to search for an item..."
           style={styles.search}
           onChangeText={setInput}
           value={input}
           cursorColor="red"
         />
+        {input.length === 0 && <MagnifyingGlassIcon size={25} color="gray" />}
 
         {input.length > 0 && (
           <XMarkIcon size={30} color="red" onPress={() => setInput("")} />

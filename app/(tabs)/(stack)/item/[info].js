@@ -3,11 +3,7 @@ import { Image, StyleSheet, Text, View } from "react-native";
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BarChart } from "react-native-gifted-charts";
-import {
-  ArrowLeftIcon,
-  TagIcon,
-  StarIcon,
-} from "react-native-heroicons/outline";
+import { ArrowLeftIcon, StarIcon } from "react-native-heroicons/outline";
 import { StarIcon as Star } from "react-native-heroicons/solid";
 import Navbar from "../../../../components/Navbar";
 import { useEffect, useState } from "react";
@@ -22,6 +18,7 @@ import {
 import Table from "../../../../components/Table";
 import { useData } from "../../../../DataContext";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { categoryColor } from "../../../../utils";
 
 export default function ItemScreen() {
   const params = useLocalSearchParams();
@@ -62,14 +59,16 @@ export default function ItemScreen() {
     const b = [];
 
     querySnapshot.forEach((doc) => {
-      d.push({ id: doc.id, ...doc.data() });
+      if (!doc.data().id) d.push({ id: doc.id, ...doc.data() });
+      else d.push({ ...doc.data() });
+
       b.push({
         value: doc.data().last_updated[1],
         label: doc.data().shop_name,
       });
     });
 
-    console.log(d);
+    //console.log(d);
     setData(d);
     setBarData(b);
   };
@@ -171,6 +170,15 @@ export default function ItemScreen() {
                 resizeMode: "contain",
               }}
             />
+            <View style={{ position: "absolute", right: 30, top: 10 }}>
+              <TouchableOpacity onPress={() => handleFav()}>
+                {!isFav ? (
+                  <StarIcon size={35} color="black" />
+                ) : (
+                  <Star size={35} color="gold" stroke="black" />
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View
@@ -179,24 +187,18 @@ export default function ItemScreen() {
               flex: 1,
               flexDirection: "row",
               alignItems: "center",
-              marginLeft: 20,
+              marginHorizontal: 20,
               gap: 10,
             }}
           >
             <Text
+              numberOfLines={2}
               style={{
                 fontSize: 30,
               }}
             >
               {meta?.name}
             </Text>
-            <TouchableOpacity onPress={() => handleFav()}>
-              {!isFav ? (
-                <StarIcon size={35} color="black" />
-              ) : (
-                <Star size={35} color="gold" stroke="black" />
-              )}
-            </TouchableOpacity>
           </View>
 
           {/* General Info */}
@@ -216,8 +218,10 @@ export default function ItemScreen() {
               style={{ flex: 0.5, borderRightWidth: 1, borderColor: "black" }}
             >
               <View style={{ paddingVertical: 10 }}>
-                <Text style={{ fontWeight: 400, fontSize: 20 }}>
-                  Categories:{" "}
+                <Text
+                  style={{ fontWeight: 400, fontSize: 15, marginBottom: 2 }}
+                >
+                  Categories{" "}
                 </Text>
                 {meta?.category?.map((cat) => (
                   <View
@@ -228,17 +232,30 @@ export default function ItemScreen() {
                     }}
                     key={cat}
                   >
-                    <TagIcon size={20} color="red" />
-                    <Text style={{ fontWeight: 400 }}>{cat.toUpperCase()}</Text>
+                    <Text
+                      style={{
+                        fontWeight: 400,
+                        color: "white",
+                        backgroundColor: categoryColor(cat),
+                        borderRadius: 10,
+                        paddingHorizontal: 10,
+                        paddingVertical: 2,
+                        fontWeight: "600",
+                      }}
+                    >
+                      {cat.toUpperCase()}
+                    </Text>
                   </View>
                 ))}
               </View>
             </View>
 
             <View style={{ flex: 0.5, paddingLeft: 10 }}>
-              <Text style={{ fontWeight: 400, fontSize: 20 }}>Weight: </Text>
+              <Text style={{ fontWeight: "400", fontSize: 15 }}>Weight: </Text>
 
-              <Text style={{ fontWeight: 400 }}>{meta?.weight}</Text>
+              <Text style={{ fontWeight: "600", fontSize: 15 }}>
+                {meta?.weight}
+              </Text>
             </View>
           </View>
 
@@ -252,22 +269,26 @@ export default function ItemScreen() {
           ></View>
 
           {/* Graph */}
-          <Text style={{ marginLeft: 20, fontSize: 30 }}>Price Graph</Text>
-          <View style={styles.graphContainer}>
-            {barData1.length > 0 && (
-              <BarChart
-                frontColor={"#177AD5"}
-                barWidth={25}
-                data={barData1}
-                barBorderRadius={4}
-              />
-            )}
-          </View>
+          {barData.length > 1 && (
+            <>
+              <Text style={{ marginLeft: 20, fontSize: 30 }}>Price Graph</Text>
+              <View style={styles.graphContainer}>
+                <BarChart
+                  frontColor={"#6F2DA8"}
+                  barWidth={25}
+                  spacing={40}
+                  data={barData}
+                  barBorderRadius={4}
+                  yAxisTextStyle={{ fontWeight: "600" }}
+                />
+              </View>
+            </>
+          )}
 
           {/* Table */}
-          <Text style={{ marginLeft: 20, fontSize: 30, marginTop: 20 }}>
+          {/* <Text style={{ marginLeft: 20, fontSize: 30, marginTop: 20 }}>
             Price Table
-          </Text>
+          </Text> */}
           <View style={styles.table}>
             <View
               style={{
@@ -314,7 +335,7 @@ const styles = StyleSheet.create({
     width: "100%",
     flexDirection: "row",
     justifyContent: "center",
-
+    position: "relative",
     borderRadius: 10,
     alignItems: "center",
   },

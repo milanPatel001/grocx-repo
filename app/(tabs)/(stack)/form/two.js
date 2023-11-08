@@ -19,7 +19,7 @@ import { db, storage } from "../../../../firebaseConfig";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 export default function AddFormTwo() {
-  const [loc, setLoc] = useState({ shop_name: "None" });
+  const [location, setLoc] = useState({ shop_name: "None" });
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("");
   const [shop_name, setShopName] = useState("");
@@ -74,7 +74,7 @@ export default function AddFormTwo() {
     return await getDownloadURL(storageRef);
   }
 
-  const handleDBCalls = async () => {
+  const handleDBCalls = async (l) => {
     //1. If there's no item update, 4 calls:
     //                         0. Upload image to cloud and return reference to img field and then proceed
     //                         1. item field creation 2. location field creation 3. add prices and date
@@ -86,29 +86,22 @@ export default function AddFormTwo() {
     //1. If there's no loc update, (regardless of item update): create location fields in location collection
     //2. If there's no item update, create item field in search collection
 
-    const priceRef = doc(
-      collection(
-        db,
-        "items",
-        state.item.id,
-        "location",
-        state.location.id,
-        "prices"
-      )
-    );
-    const locRef = doc(
-      db,
-      "items",
-      state.item.id,
-      "location",
-      state.location.id
-    );
-    const itemRef = doc(db, "items", state.item.id);
-    const searchLocRef = doc(db, "locations", state.location.id);
+    console.log("----------------ITEM---------------------");
+    console.log(state.item);
+    console.log("----------------Location---------------------");
 
-    const searchLocObj = state.location;
+    console.log(l);
+
+    const priceRef = doc(
+      collection(db, "items", state.item.id, "location", l.id, "prices")
+    );
+    const locRef = doc(db, "items", state.item.id, "location", l.id);
+    const itemRef = doc(db, "items", state.item.id);
+    const searchLocRef = doc(db, "locations", l.id);
+
+    const searchLocObj = l;
     const locObj = {
-      ...state.location,
+      ...l,
       last_updated: [Timestamp.fromDate(date), Number(price)],
     };
     const priceObj = {
@@ -121,18 +114,21 @@ export default function AddFormTwo() {
 
       runTransaction(db, async (transaction) => {
         if (state.location.update) {
-          // ******************** UPDATING LOCATION ************************
+          // ******************** UPDATING/CREATING LOCATION (pre existing loc)************************
 
           const locDoc = await transaction.get(locRef);
-          if (!locDoc.exists) throw "Document does not exist";
+          if (!locDoc.data()) {
+            transaction.set(locRef, locObj);
+          } else {
+            // location found in that item
+            const last_updated = locDoc.data().last_updated;
+            const timestamp = Timestamp.fromDate(date);
 
-          const last_updated = locDoc.data().last_updated;
-          const timestamp = Timestamp.fromDate(date);
-
-          if (last_updated[0].seconds < timestamp.seconds) {
-            transaction.update(locRef, {
-              last_updated: [timestamp, Number(price)],
-            });
+            if (last_updated[0].seconds < timestamp.seconds) {
+              transaction.update(locRef, {
+                last_updated: [timestamp, Number(price)],
+              });
+            }
           }
         } else if (!state.location.update) {
           // ******************** CREATING LOCATION ************************
@@ -168,7 +164,7 @@ export default function AddFormTwo() {
       batch.set(priceRef, priceObj);
       batch.set(searchRef, searchObj);
 
-      if (!state.location.update) {
+      if (!location.update) {
         // ********** CREATING LOCATION in locations collection ****************
         batch.set(searchLocRef, searchLocObj);
       }
@@ -230,7 +226,7 @@ export default function AddFormTwo() {
       date: false,
     };
 
-    if (!state.location || loc.shop_name === "None") {
+    if (!state.location || location.shop_name === "None") {
       // got no location using location modal
       if (
         shop_name.length > 0 &&
@@ -250,8 +246,8 @@ export default function AddFormTwo() {
             id = id + arr1[i].substring(0, 3).toUpperCase();
           }
 
-          id += arr2[0].toUpperCase() + arr2[arr2.length - 1].toUpperCase();
-
+          id += arr2[0].toUpperCase();
+          if (arr2.length > 1) id += arr2[arr2.length - 1].toUpperCase();
           return id;
         };
 
@@ -267,7 +263,7 @@ export default function AddFormTwo() {
 
         updateLocation(obj);
 
-        handleDBCalls();
+        handleDBCalls(obj);
       } else {
         // we don't have location and also not date or price
 
@@ -284,7 +280,7 @@ export default function AddFormTwo() {
     } else {
       // got location using location modal
       if (typeof date !== "string" && price.length > 0) {
-        handleDBCalls();
+        handleDBCalls(state.location);
       } else {
         // we have location but not date or price
         if (typeof date === "string") error.date = true;
@@ -335,7 +331,7 @@ export default function AddFormTwo() {
                 style={{}}
                 onPress={() => router.push("/form/locationModal")}
               >
-                <Text>{loc.shop_name}</Text>
+                <Text>{location.shop_name}</Text>
               </TouchableOpacity>
             </View>
           </View>

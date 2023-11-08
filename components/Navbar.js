@@ -1,15 +1,27 @@
 import { useNavigation, useRouter } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { MagnifyingGlassIcon } from "react-native-heroicons/outline";
+import {
+  ArrowRightOnRectangleIcon,
+  MagnifyingGlassIcon,
+} from "react-native-heroicons/outline";
 import { StatusBar } from "expo-status-bar";
+import { auth } from "../firebaseConfig";
+
+import { useAuth } from "../AuthContext";
 
 export default function Navbar({ labelStatus, children }) {
+  const { signOut } = useAuth();
+
+  const handleSignOut = () => {
+    signOut();
+  };
+
   const router = useRouter();
 
   return (
     <View style={styles.navbar}>
-      <StatusBar backgroundColor="white" />
+      <StatusBar backgroundColor="#d63c31" style="light" />
       {labelStatus && (
         <View style={styles.left}>
           <Text
@@ -28,11 +40,31 @@ export default function Navbar({ labelStatus, children }) {
       <View style={{ marginLeft: 20, marginTop: 25 }}>{children}</View>
 
       <View style={styles.right}>
-        <TouchableOpacity
-          style={{ marginRight: 30 }}
-          onPress={() => router.push("/search")}
-        >
+        <TouchableOpacity onPress={() => router.push("/search")}>
           <MagnifyingGlassIcon size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() =>
+            Alert.alert(
+              "",
+              "Do you want to sign out?",
+              [
+                {
+                  text: "Yes",
+                  onPress: handleSignOut,
+                },
+                {
+                  text: "No",
+                  style: "cancel",
+                },
+              ],
+              {
+                cancelable: true,
+              }
+            )
+          }
+        >
+          <ArrowRightOnRectangleIcon size={28} color="red" />
         </TouchableOpacity>
       </View>
     </View>
@@ -58,6 +90,9 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     justifyContent: "flex-end",
+    alignItems: "center",
+    paddingRight: 10,
+    gap: 20,
   },
   left: {
     flex: 1,

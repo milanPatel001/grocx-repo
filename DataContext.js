@@ -37,17 +37,17 @@ export const DataProvider = ({ children }) => {
     const d = [];
 
     const cat = {
-      Biscuit: [],
-      Drink: [],
-      Pizza: [],
+      Biscuits: [],
+      Drinks: [],
+      Snacks: [],
       IceCream: [],
-      Vegetable: [],
-      Chips: [],
-      Sauce: [],
+      Sweets: [],
+      Fruits: [],
     };
 
     querySnapshot.forEach((doc) => {
-      d.push({ id: doc.id, ...doc.data() });
+      if (!doc.data().id) d.push({ id: doc.id, ...doc.data() });
+      else d.push({ ...doc.data() });
 
       doc
         .data()
@@ -70,16 +70,17 @@ export const DataProvider = ({ children }) => {
     querySnapshot.forEach((doc) => {
       d.push({ id: doc.id, ...doc.data() });
     });
-    console.log(d);
+    //console.log(d);
     dispatch({ type: "UPDATE_FAV_DATA", payload: d });
   };
 
-  useEffect(() => {
-    getAllHomeDocs();
-  }, []);
+  // useEffect(() => {
+
+  // }, []);
 
   useEffect(() => {
     if (authState[0]?.uid) {
+      getAllHomeDocs();
       getAllFavDocs();
     }
   }, [authState[0]?.uid]);

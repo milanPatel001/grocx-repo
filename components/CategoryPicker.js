@@ -5,8 +5,10 @@ import { useFormData } from "../FormContext";
 
 export default function CategoryPicker() {
   const [checked, setisChecked] = useState([
-    { cat: "Biscuit", ch: false },
-    { cat: "Drink", ch: false },
+    { cat: "Biscuits", ch: false },
+    { cat: "Drinks", ch: false },
+    { cat: "Fruits", ch: false },
+    { cat: "Snacks", ch: false },
   ]);
 
   const { updateCategories } = useFormData();

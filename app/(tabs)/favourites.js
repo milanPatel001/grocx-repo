@@ -48,7 +48,7 @@ export default function Favourites() {
     }
   }, [state.favData]);
 
-  if (!authState[0].uid) {
+  if (!authState[0]?.uid) {
     return (
       <SafeAreaView>
         <View>
@@ -62,53 +62,56 @@ export default function Favourites() {
     <SafeAreaView style={{ backgroundColor: "white" }}>
       <Navbar labelStatus={true} />
 
-      <View
-        style={{
-          flexDirection: "row",
-          marginTop: 15,
-          paddingHorizontal: 20,
-          gap: 20,
-        }}
-      >
-        <TouchableOpacity
+      {/* hidden buttons (WIP)*/}
+      {false && (
+        <View
           style={{
-            padding: 10,
-            paddingHorizontal: 25,
-            borderRadius: 20,
-            borderColor: "green",
-            backgroundColor: active === "items" ? "#20a87f" : "white",
-            borderWidth: 1,
+            flexDirection: "row",
+            marginTop: 15,
+            paddingHorizontal: 20,
+            gap: 20,
           }}
-          onPress={() => setActive("items")}
         >
-          <Text
+          <TouchableOpacity
             style={{
-              color: active === "items" ? "white" : "green",
+              padding: 10,
+              paddingHorizontal: 25,
+              borderRadius: 20,
+              borderColor: "green",
+              backgroundColor: active === "items" ? "#20a87f" : "white",
+              borderWidth: 1,
             }}
+            onPress={() => setActive("items")}
           >
-            Items
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{
-            padding: 10,
-            paddingHorizontal: 25,
-            borderRadius: 20,
-            borderColor: "blue",
-            backgroundColor: active === "shops" ? "#219fed" : "white",
-            borderWidth: 1,
-          }}
-          onPress={() => setActive("shops")}
-        >
-          <Text
+            <Text
+              style={{
+                color: active === "items" ? "white" : "green",
+              }}
+            >
+              Items
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
             style={{
-              color: active === "shops" ? "white" : "blue",
+              padding: 10,
+              paddingHorizontal: 25,
+              borderRadius: 20,
+              borderColor: "blue",
+              backgroundColor: active === "shops" ? "#219fed" : "white",
+              borderWidth: 1,
             }}
+            onPress={() => setActive("shops")}
           >
-            Shops
-          </Text>
-        </TouchableOpacity>
-      </View>
+            <Text
+              style={{
+                color: active === "shops" ? "white" : "blue",
+              }}
+            >
+              Shops
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       <View
         style={{

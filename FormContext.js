@@ -54,10 +54,12 @@ export const FormProvider = ({ children }) => {
 
   //Modal methods
   const updateItem = (newData) => {
+    console.log(newData);
     dispatch({ type: "UPDATE_ITEM", payload: newData });
   };
 
   const updateLocation = (newData) => {
+    console.log(newData);
     dispatch({ type: "UPDATE_LOCATION", payload: newData });
   };
 
