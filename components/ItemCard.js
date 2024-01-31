@@ -1,19 +1,25 @@
 import { useNavigation, useRouter } from "expo-router";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import {
-  TouchableHighlight,
-  TouchableOpacity,
-} from "react-native-gesture-handler";
+import { useData } from "../DataContext";
 
 export default function ItemCard({ item }) {
   const router = useRouter();
+  const { updateRecentData } = useData();
+
+  const handleItemCardPress = () => {
+    const itemInfo = {
+      id: item.id,
+      img: item.img,
+      name: item.name,
+    };
+
+    updateRecentData(itemInfo);
+
+    router.push({ pathname: "/item/[info]", params: { info: item.id } });
+  };
 
   return (
-    <Pressable
-      onPress={() =>
-        router.push({ pathname: "/item/[info]", params: { info: item.id } })
-      }
-    >
+    <Pressable onPress={() => handleItemCardPress()}>
       <View style={styles.cardContainer}>
         {/* Top Section - Cover Image */}
         <View style={styles.coverImageContainer}>

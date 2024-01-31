@@ -2,6 +2,7 @@ import {
   Image,
   Pressable,
   ScrollView,
+  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -12,35 +13,17 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "../../firebaseConfig";
 import { useEffect, useState } from "react";
 import { MinusCircleIcon } from "react-native-heroicons/solid";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  doc,
-  deleteDoc,
-} from "firebase/firestore";
 import { useData } from "../../DataContext";
+import { handleFavoritesDeletion } from "../../utils";
+import { useRouter } from "expo-router";
 
 export default function Favourites() {
   const authState = useAuthState(auth);
   const [active, setActive] = useState("items");
   const [data, setData] = useState([]);
 
+  const router = useRouter();
   const { state, updateFavData } = useData();
-
-  const handleDeletion = async (id) => {
-    if (authState[0]?.uid) {
-      const ref = doc(db, "favourites", authState[0].uid, "items", id);
-
-      await deleteDoc(ref);
-
-      let fav = [...state.favData];
-      fav = fav.filter((f) => id !== f.id);
-
-      updateFavData(fav);
-    }
-  };
 
   useEffect(() => {
     if (state.favData) {
@@ -62,7 +45,99 @@ export default function Favourites() {
     <SafeAreaView style={{ backgroundColor: "white" }}>
       <Navbar labelStatus={true} />
 
-      {/* hidden buttons (WIP)*/}
+      <View style={styles.container}>
+        <ScrollView>
+          {data.length > 0 &&
+            data.map((item) => (
+              <View
+                style={{
+                  backgroundColor: "white",
+                  flexDirection: "row",
+                }}
+                key={item.id}
+              >
+                <Pressable
+                  style={styles.image}
+                  onPress={() => router.push(`/item/${item.id}`)}
+                >
+                  <Image
+                    source={{
+                      uri: item.img,
+                    }}
+                    style={{
+                      height: "100%",
+                      width: "100%",
+                      resizeMode: "contain",
+                    }}
+                  />
+                </Pressable>
+
+                <Pressable
+                  style={styles.text}
+                  onPress={() => router.push(`/item/${item.id}`)}
+                >
+                  <Text
+                    style={{
+                      fontFamily: "serif",
+                      fontWeight: 600,
+                      fontSize: 20,
+                    }}
+                  >
+                    {item.name}
+                  </Text>
+                  <Text>{item.weight}</Text>
+                  <Text>{item.category[0].toUpperCase()}</Text>
+                </Pressable>
+                <View
+                  style={{
+                    flex: 0.1,
+
+                    justifyContent: "center",
+                  }}
+                >
+                  <TouchableOpacity
+                    onPress={() =>
+                      handleFavoritesDeletion(
+                        item.id,
+                        state,
+                        authState,
+                        updateFavData
+                      )
+                    }
+                  >
+                    <MinusCircleIcon size={25} color={"red"} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+        </ScrollView>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    height: "100%",
+    paddingHorizontal: 20,
+    gap: 10,
+    marginTop: 10,
+  },
+  image: {
+    height: 120,
+    width: 150,
+    alignItems: "center",
+    flex: 0.4,
+  },
+  text: {
+    flex: 0.5,
+    justifyContent: "center",
+    marginLeft: 10,
+  },
+});
+
+{
+  /* hidden buttons (WIP)
       {false && (
         <View
           style={{
@@ -111,83 +186,5 @@ export default function Favourites() {
             </Text>
           </TouchableOpacity>
         </View>
-      )}
-
-      <View
-        style={{
-          height: "100%",
-          paddingHorizontal: 20,
-          gap: 10,
-          marginTop: 10,
-        }}
-      >
-        <ScrollView>
-          {data.length > 0 &&
-            data.map((item) => (
-              <View
-                style={{
-                  backgroundColor: "white",
-                  flexDirection: "row",
-                }}
-                key={item.id}
-              >
-                <Pressable
-                  style={{
-                    height: 120,
-                    width: 150,
-                    alignItems: "center",
-                    flex: 0.4,
-                  }}
-                  onPress={() => router.push(`/item/${item.id}`)}
-                >
-                  <Image
-                    source={{
-                      uri: item.img,
-                    }}
-                    style={{
-                      height: "100%",
-                      width: "100%",
-                      resizeMode: "contain",
-                    }}
-                  />
-                </Pressable>
-
-                <Pressable
-                  style={{
-                    flex: 0.5,
-
-                    justifyContent: "center",
-                    marginLeft: 10,
-                  }}
-                  onPress={() => router.push(`/item/${item.id}`)}
-                >
-                  <Text
-                    style={{
-                      fontFamily: "serif",
-                      fontWeight: 600,
-                      fontSize: 20,
-                    }}
-                  >
-                    {item.name}
-                  </Text>
-                  <Text>{item.weight}</Text>
-                  <Text>{item.category[0].toUpperCase()}</Text>
-                </Pressable>
-                <View
-                  style={{
-                    flex: 0.1,
-
-                    justifyContent: "center",
-                  }}
-                >
-                  <TouchableOpacity onPress={() => handleDeletion(item.id)}>
-                    <MinusCircleIcon size={25} color={"red"} />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))}
-        </ScrollView>
-      </View>
-    </SafeAreaView>
-  );
+      )} */
 }

@@ -18,7 +18,11 @@ import {
 import Table from "../../../../components/Table";
 import { useData } from "../../../../DataContext";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { categoryColor } from "../../../../utils";
+import {
+  categoryColor,
+  getItemInfo,
+  handleFavoritesAddition,
+} from "../../../../utils";
 
 export default function ItemScreen() {
   const params = useLocalSearchParams();
@@ -49,76 +53,9 @@ export default function ItemScreen() {
     { value: 98, dataPointText: "98", label: "12" },
   ];
 
-  const getAllDocs = async () => {
-    console.log("Inside [info], calling getAllDocs...");
-    const querySnapshot = await getDocs(
-      collection(db, "items", params.info, "location")
-    );
-
-    const d = [];
-    const b = [];
-
-    querySnapshot.forEach((doc) => {
-      if (!doc.data().id) d.push({ id: doc.id, ...doc.data() });
-      else d.push({ ...doc.data() });
-
-      b.push({
-        value: doc.data().last_updated[1],
-        label: doc.data().shop_name,
-      });
-    });
-
-    //console.log(d);
-    setData(d);
-    setBarData(b);
-  };
-
-  const handleFav = async () => {
-    if (!isFav) {
-      if (authState[0]?.uid) {
-        const ref = doc(
-          db,
-          "favourites",
-          authState[0].uid,
-          "items",
-          params.info
-        );
-        const obj = {
-          img: meta?.img,
-          weight: meta?.weight,
-          name: meta?.name,
-          category: meta?.category,
-        };
-        await setDoc(ref, obj);
-
-        const fav = [...state.favData];
-        fav.push({ id: params.info, ...obj });
-
-        updateFavData(fav);
-      }
-    } else {
-      if (authState[0]?.uid) {
-        const ref = doc(
-          db,
-          "favourites",
-          authState[0].uid,
-          "items",
-          params.info
-        );
-
-        await deleteDoc(ref);
-
-        let fav = [...state.favData];
-        fav = fav.filter((f) => params.info !== f.id);
-
-        updateFavData(fav);
-      }
-    }
-  };
-
   useEffect(() => {
     if (data.length === 0) {
-      getAllDocs();
+      getItemInfo(setData, setBarData, params);
     }
   }, []);
 
@@ -134,11 +71,8 @@ export default function ItemScreen() {
   useEffect(() => {
     if (state.favData) {
       const found = state.favData.find((item) => item.id === params.info);
-      if (found) {
-        setisFav(true);
-      } else {
-        setisFav(false);
-      }
+
+      setisFav(found);
     }
   }, [state.favData]);
 
@@ -171,7 +105,18 @@ export default function ItemScreen() {
               }}
             />
             <View style={{ position: "absolute", right: 30, top: 10 }}>
-              <TouchableOpacity onPress={() => handleFav()}>
+              <TouchableOpacity
+                onPress={() =>
+                  handleFavoritesAddition(
+                    isFav,
+                    state,
+                    authState,
+                    params,
+                    meta,
+                    updateFavData
+                  )
+                }
+              >
                 {!isFav ? (
                   <StarIcon size={35} color="black" />
                 ) : (
@@ -181,16 +126,7 @@ export default function ItemScreen() {
             </View>
           </View>
 
-          <View
-            style={{
-              justifyContent: "flex-start",
-              flex: 1,
-              flexDirection: "row",
-              alignItems: "center",
-              marginHorizontal: 20,
-              gap: 10,
-            }}
-          >
+          <View style={styles.productName}>
             <Text
               numberOfLines={2}
               style={{
@@ -202,18 +138,7 @@ export default function ItemScreen() {
           </View>
 
           {/* General Info */}
-          <View
-            style={{
-              marginHorizontal: 20,
-              marginVertical: 20,
-              flexDirection: "row",
-              borderWidth: 1,
-              borderRadius: 10,
-              borderColor: "black",
-              alignItems: "center",
-              paddingHorizontal: 10,
-            }}
-          >
+          <View style={styles.generalInfo}>
             <View
               style={{ flex: 0.5, borderRightWidth: 1, borderColor: "black" }}
             >
@@ -259,14 +184,7 @@ export default function ItemScreen() {
             </View>
           </View>
 
-          <View
-            style={{
-              borderWidth: 0.5,
-              borderColor: "#dfe3e6",
-              marginHorizontal: 20,
-              marginVertical: 10,
-            }}
-          ></View>
+          <View style={styles.divider}></View>
 
           {/* Graph */}
           {barData.length > 1 && (
@@ -290,19 +208,10 @@ export default function ItemScreen() {
             Price Table
           </Text> */}
           <View style={styles.table}>
-            <View
-              style={{
-                flexDirection: "row",
-                height: 60,
-                borderBottomWidth: 1,
-                borderBottomColor: "grey",
-                paddingHorizontal: 10,
-              }}
-            >
+            <View style={styles.tableLeft}>
               <View
                 style={{
                   flex: 0.6,
-
                   justifyContent: "center",
                 }}
               >
@@ -354,6 +263,37 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingBottom: 15,
     flex: 1,
+  },
+  tableLeft: {
+    flexDirection: "row",
+    height: 60,
+    borderBottomWidth: 1,
+    borderBottomColor: "grey",
+    paddingHorizontal: 10,
+  },
+  divider: {
+    borderWidth: 0.5,
+    borderColor: "#dfe3e6",
+    marginHorizontal: 20,
+    marginVertical: 10,
+  },
+  generalInfo: {
+    marginHorizontal: 20,
+    marginVertical: 20,
+    flexDirection: "row",
+    borderWidth: 1,
+    borderRadius: 10,
+    borderColor: "black",
+    alignItems: "center",
+    paddingHorizontal: 10,
+  },
+  productName: {
+    justifyContent: "flex-start",
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 20,
+    gap: 10,
   },
 });
 

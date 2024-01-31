@@ -15,6 +15,20 @@ const dataReducer = (state, action) => {
       return { ...state, homeData: action.payload };
     case "UPDATE_CAT_DATA":
       return { ...state, catData: action.payload };
+    case "UPDATE_RECENT_DATA":
+      const found = state.recentData.find(
+        (item) => item.id === action.payload.id
+      );
+      if (found) return state;
+
+      const newArr = [...state.recentData];
+
+      if (state.recentData.length == 6) {
+        newArr.shift();
+      }
+      newArr.push(action.payload);
+
+      return { ...state, recentData: newArr };
     default:
       return state;
   }
@@ -25,6 +39,7 @@ export const DataProvider = ({ children }) => {
     favData: null,
     homeData: null,
     catData: null,
+    recentData: [],
   };
 
   const [state, dispatch] = useReducer(dataReducer, initialState);
@@ -74,10 +89,6 @@ export const DataProvider = ({ children }) => {
     dispatch({ type: "UPDATE_FAV_DATA", payload: d });
   };
 
-  // useEffect(() => {
-
-  // }, []);
-
   useEffect(() => {
     if (authState[0]?.uid) {
       getAllHomeDocs();
@@ -94,8 +105,15 @@ export const DataProvider = ({ children }) => {
     dispatch({ type: "UPDATE_HOME_DATA", payload: newData });
   };
 
+  const updateRecentData = (newData) => {
+    dispatch({ type: "UPDATE_RECENT_DATA", payload: newData });
+    //console.log(state.recentData);
+  };
+
   return (
-    <DataContext.Provider value={{ state, updateFavData, updateHomeData }}>
+    <DataContext.Provider
+      value={{ state, updateFavData, updateHomeData, updateRecentData }}
+    >
       {children}
     </DataContext.Provider>
   );

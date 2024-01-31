@@ -15,7 +15,7 @@ export default function Login() {
   const [hidden, setHidden] = useState(true);
   const { signIn } = useAuth();
 
-  const router = useRouter();
+  //const router = useRouter();
 
   const handleLogin = () => {
     signIn(email, password);
@@ -51,44 +51,14 @@ export default function Login() {
         </View>
 
         <View style={styles.form}>
-          {/* <Text
-            style={{
-              fontWeight: "500",
-              fontFamily: "serif",
-              fontSize: 25,
-              marginLeft: 45,
-            }}
-          >
-            Email
-          </Text> */}
           <TextInput
             placeholder="Enter email"
             style={styles.email}
             onChangeText={setEmail}
             value={email}
           />
-          {/* <Text
-            style={{
-              fontWeight: "500",
-              fontFamily: "serif",
-              fontSize: 25,
-              marginLeft: 45,
-            }}
-          >
-            Password
-          </Text> */}
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              height: "auto",
-              paddingBottom: 10,
-              paddingRight: 5,
-              paddingLeft: 14,
-              marginLeft: "auto",
-              marginRight: "auto",
-            }}
-          >
+
+          <View style={styles.passwordContainer}>
             <TextInput
               placeholder="Enter password"
               secureTextEntry={hidden}
@@ -111,16 +81,7 @@ export default function Login() {
             </Text>
           </TouchableOpacity>
 
-          <View
-            style={{
-              borderWidth: 0.2,
-              borderColor: "gray",
-              marginTop: 30,
-              width: "75%",
-              marginLeft: "auto",
-              marginRight: "auto",
-            }}
-          ></View>
+          <View style={styles.divider}></View>
 
           <Text style={{ marginTop: 20, textAlign: "center", fontSize: 17 }}>
             Not a member?
@@ -196,6 +157,16 @@ const styles = StyleSheet.create({
     marginTop: 5,
     fontSize: 20,
   },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    height: "auto",
+    paddingBottom: 10,
+    paddingRight: 5,
+    paddingLeft: 14,
+    marginLeft: "auto",
+    marginRight: "auto",
+  },
   password: {
     borderBottomWidth: 1,
     borderColor: "black",
@@ -215,5 +186,13 @@ const styles = StyleSheet.create({
     marginLeft: "auto",
     marginRight: "auto",
     marginTop: 40,
+  },
+  divider: {
+    borderWidth: 0.2,
+    borderColor: "gray",
+    marginTop: 30,
+    width: "75%",
+    marginLeft: "auto",
+    marginRight: "auto",
   },
 });

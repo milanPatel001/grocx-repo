@@ -1,4 +1,3 @@
-import { StatusBar } from "expo-status-bar";
 import {
   View,
   Text,
@@ -9,12 +8,9 @@ import {
 } from "react-native";
 import { Redirect, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { auth, db } from "../../../firebaseConfig";
 import { useEffect, useLayoutEffect, useState } from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
 import Navbar from "../../../components/Navbar";
 import ItemCard from "../../../components/ItemCard";
-import { collection } from "firebase/firestore";
 import { useData } from "../../../DataContext";
 import { PlusCircleIcon } from "react-native-heroicons/solid";
 import { useAuth } from "../../../AuthContext";
@@ -40,15 +36,7 @@ export default function App() {
 
   return (
     <>
-      <SafeAreaView
-        style={{
-          width: "100%",
-          height: "100%",
-          backgroundColor: "white",
-          gap: 15,
-          position: "relative",
-        }}
-      >
+      <SafeAreaView style={styles.safeArea}>
         {/* Navbar */}
         <Navbar labelStatus={true} />
 
@@ -108,6 +96,13 @@ export default function App() {
 const styles = StyleSheet.create({
   main: {
     marginBottom: 96,
+  },
+  safeArea: {
+    width: "100%",
+    height: "100%",
+    backgroundColor: "white",
+    gap: 15,
+    position: "relative",
   },
 });
 
