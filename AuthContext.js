@@ -1,7 +1,14 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "./firebaseConfig";
-import { signInWithEmailAndPassword, signOut as sgOut } from "firebase/auth";
+import { auth, provider } from "./firebaseConfig";
+import {
+  signInWithEmailAndPassword,
+  signOut as sgOut,
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  signInWithPopup,
+  GoogleAuthProvider,
+} from "firebase/auth";
 import { useRouter } from "expo-router";
 import { Alert } from "react-native";
 
@@ -17,13 +24,31 @@ export function AuthProvider({ children }) {
 
   const router = useRouter();
 
+  const signUp = (email, password) => {
+    createUserWithEmailAndPassword(auth, email, password).then(
+      (userCredential) => {
+        const user = userCredential.user;
+
+        sendEmailVerification(user)
+          .then(() => {
+            router.replace("/login");
+          })
+          .catch((err) => console.error(err));
+      }
+    );
+  };
+
   const signIn = (email, password) => {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Signed in
         const user = userCredential.user;
+        //if (!user.emailVerified)
+        //Alert.alert("", "Email not verified. Verify your email first!!");
+        //else {
         setUser(user);
         router.replace("/");
+        //}
       })
       .catch((error) => {
         Alert.alert("", "Wrong email or password!!");
@@ -46,7 +71,7 @@ export function AuthProvider({ children }) {
   }, [authState[0]?.uid]);
 
   return (
-    <AuthContext.Provider value={{ user, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, signIn, signOut, signUp }}>
       {children}
     </AuthContext.Provider>
   );

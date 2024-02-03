@@ -3,29 +3,44 @@ import { Alert, StyleSheet, Text, TextInput, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SvgUri } from "react-native-svg";
+
 import { useRouter } from "expo-router";
+
 import { useAuth } from "../AuthContext";
 import { EyeIcon, EyeSlashIcon } from "react-native-heroicons/outline";
 
-export default function Login() {
+export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [hidden, setHidden] = useState(true);
-  const [error, setError] = useState([false, false]);
+  const [retypePassword, setRetypePassword] = useState("");
+  const [error, setError] = useState([false, false, false]);
 
   const router = useRouter();
-  const { signIn } = useAuth();
+  const { signUp } = useAuth();
 
-  const handleLogin = () => {
-    if (email.length === 0 || password.length === 0) {
-      const e = [false, false];
+  const handleSignUp = () => {
+    if (
+      email.length === 0 ||
+      password.length === 0 ||
+      retypePassword.length === 0
+    ) {
+      const e = [false, false, false];
 
       if (email.length === 0) e[0] = true;
       if (password.length === 0) e[1] = true;
+      if (retypePassword.length === 0) e[2] = true;
 
       setError(e);
+    } else if (password !== retypePassword) {
+      Alert.alert(
+        "",
+        "Password should match the input in the retype password field."
+      );
+    } else if (password.length < 6) {
+      Alert.alert("", "Password should be of 6 or more characters!!");
     } else {
-      signIn(email.trim(), password.trim());
+      signUp(email, password);
+      //router.push("/otp");
     }
   };
 
@@ -54,7 +69,7 @@ export default function Login() {
           <Text
             style={{ fontSize: 25, fontFamily: "serif", fontWeight: "700" }}
           >
-            Sign In
+            Sign Up
           </Text>
         </View>
 
@@ -70,45 +85,49 @@ export default function Login() {
             value={email}
           />
 
-          <View style={styles.passwordContainer}>
-            <TextInput
-              placeholder="Enter password"
-              placeholderTextColor={error[1] ? "red" : "gray"}
-              secureTextEntry={hidden}
-              onChangeText={setPassword}
-              value={password}
-              style={{
-                ...styles.password,
-                borderColor:
-                  password.length === 0 && error[0] ? "red" : "black",
-              }}
-            />
-            <TouchableOpacity onPress={() => setHidden(!hidden)}>
-              {!hidden ? (
-                <EyeSlashIcon size={24} color="gray" />
-              ) : (
-                <EyeIcon size={24} color="gray" />
-              )}
-            </TouchableOpacity>
-          </View>
+          <TextInput
+            placeholder="Enter password"
+            placeholderTextColor={error[1] ? "red" : "gray"}
+            onChangeText={setPassword}
+            value={password}
+            style={{
+              ...styles.password,
+              borderColor: password.length === 0 && error[0] ? "red" : "black",
+            }}
+          />
 
-          <TouchableOpacity style={styles.button} onPress={() => handleLogin()}>
+          <TextInput
+            placeholder="Retype password"
+            placeholderTextColor={error[2] ? "red" : "gray"}
+            onChangeText={setRetypePassword}
+            value={retypePassword}
+            style={{
+              ...styles.password,
+              borderColor:
+                retypePassword.length === 0 && error[0] ? "red" : "black",
+            }}
+          />
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => handleSignUp()}
+          >
             <Text style={{ color: "white", textAlign: "center", fontSize: 20 }}>
-              Login
+              Submit
             </Text>
           </TouchableOpacity>
 
           <View style={styles.divider}></View>
 
           <Text style={{ marginTop: 20, textAlign: "center", fontSize: 17 }}>
-            Not a member?
+            Already a member?
           </Text>
 
-          <TouchableOpacity style={{}} onPress={() => router.push("/signup")}>
+          <TouchableOpacity style={{}} onPress={() => router.push("/login")}>
             <Text
               style={{ color: "#33adff", textAlign: "center", fontSize: 15 }}
             >
-              Sign Up Here
+              Log In Here
             </Text>
           </TouchableOpacity>
         </View>
@@ -157,37 +176,36 @@ const styles = StyleSheet.create({
   },
   form: {
     flex: 1,
-    width: "75%",
+    width: "100%",
     paddingTop: 25,
   },
   email: {
-    width: "100%",
+    width: "75%",
     borderBottomWidth: 1,
     borderColor: "black",
     borderRadius: 5,
     paddingBottom: 10,
     paddingHorizontal: 5,
+    marginLeft: "auto",
+    marginRight: "auto",
     backgroundColor: "white",
     marginBottom: 30,
     marginTop: 5,
     fontSize: 20,
   },
-  passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    height: "auto",
-    paddingBottom: 10,
-    width: "100%",
-  },
   password: {
+    width: "75%",
     borderBottomWidth: 1,
     borderColor: "black",
     borderRadius: 5,
-    backgroundColor: "white",
-    fontSize: 20,
-    flexBasis: "95%",
     paddingBottom: 10,
     paddingHorizontal: 5,
+    marginLeft: "auto",
+    marginRight: "auto",
+    backgroundColor: "white",
+    marginBottom: 30,
+    marginTop: 5,
+    fontSize: 20,
   },
   button: {
     backgroundColor: "red",

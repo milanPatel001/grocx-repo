@@ -3,7 +3,13 @@ import { Image, StyleSheet, Text, View } from "react-native";
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BarChart } from "react-native-gifted-charts";
-import { ArrowLeftIcon, StarIcon } from "react-native-heroicons/outline";
+import {
+  ArrowLeftIcon,
+  StarIcon,
+  ArrowSmallUpIcon,
+  ArrowSmallDownIcon,
+  MinusIcon,
+} from "react-native-heroicons/outline";
 import { StarIcon as Star } from "react-native-heroicons/solid";
 import Navbar from "../../../../components/Navbar";
 import { useEffect, useState } from "react";
@@ -33,6 +39,10 @@ export default function ItemScreen() {
   const [meta, setMeta] = useState({});
   const [barData, setBarData] = useState([]);
   const [isFav, setisFav] = useState(false);
+  const [currentSort, setSort] = useState({
+    sort: "alphabetical",
+    order: "asc",
+  });
 
   const { state, updateFavData } = useData();
 
@@ -75,6 +85,27 @@ export default function ItemScreen() {
       setisFav(found);
     }
   }, [state.favData]);
+
+  useEffect(() => {
+    //logic for sorting data
+    const newData = [...data];
+
+    if (currentSort.sort === "alphabetical") {
+      if (currentSort.order === "asc") {
+        newData.sort((a, b) => a.shop_name.localeCompare(b.shop_name));
+      } else {
+        newData.sort((a, b) => b.shop_name.localeCompare(a.shop_name));
+      }
+    } else if (currentSort.sort === "price") {
+      if (currentSort.order === "asc") {
+        newData.sort((a, b) => a.last_updated[1] - b.last_updated[1]);
+      } else {
+        newData.sort((a, b) => b.last_updated[1] - a.last_updated[1]);
+      }
+    }
+
+    setData(newData);
+  }, [currentSort]);
 
   return (
     <SafeAreaView style={{ backgroundColor: "white" }}>
@@ -120,7 +151,7 @@ export default function ItemScreen() {
                 {!isFav ? (
                   <StarIcon size={35} color="black" />
                 ) : (
-                  <Star size={35} color="gold" stroke="black" />
+                  <Star size={35} color="gold" stroke="red" />
                 )}
               </TouchableOpacity>
             </View>
@@ -215,7 +246,42 @@ export default function ItemScreen() {
                   justifyContent: "center",
                 }}
               >
-                <Text style={{ fontSize: 20 }}>Shop Name</Text>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
+                  <Text style={{ fontSize: 20 }}>Shop Name</Text>
+                  {currentSort.sort === "alphabetical" ? (
+                    currentSort.order === "asc" ? (
+                      <ArrowSmallUpIcon
+                        size={20}
+                        color="red"
+                        onPress={() =>
+                          setSort({ sort: "alphabetical", order: "desc" })
+                        }
+                      />
+                    ) : (
+                      <ArrowSmallDownIcon
+                        size={20}
+                        color="red"
+                        onPress={() =>
+                          setSort({ sort: "alphabetical", order: "asc" })
+                        }
+                      />
+                    )
+                  ) : (
+                    <MinusIcon
+                      size={20}
+                      color="gray"
+                      onPress={() =>
+                        setSort({ sort: "alphabetical", order: "asc" })
+                      }
+                    />
+                  )}
+                </View>
               </View>
               <View
                 style={{
@@ -223,7 +289,36 @@ export default function ItemScreen() {
                   alignItems: "center",
                 }}
               >
-                <Text style={{ fontSize: 20 }}>Price</Text>
+                <View
+                  style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
+                >
+                  <Text style={{ fontSize: 20 }}>Price</Text>
+
+                  {currentSort.sort === "price" ? (
+                    currentSort.order === "asc" ? (
+                      <ArrowSmallUpIcon
+                        size={20}
+                        color="red"
+                        onPress={() =>
+                          setSort({ sort: "price", order: "desc" })
+                        }
+                      />
+                    ) : (
+                      <ArrowSmallDownIcon
+                        size={20}
+                        color="red"
+                        onPress={() => setSort({ sort: "price", order: "asc" })}
+                      />
+                    )
+                  ) : (
+                    <MinusIcon
+                      size={20}
+                      color="gray"
+                      onPress={() => setSort({ sort: "price", order: "asc" })}
+                    />
+                  )}
+                </View>
+
                 <Text style={{}}>(Last Updated)</Text>
               </View>
             </View>
