@@ -1,35 +1,30 @@
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import {
-  Dimensions,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFormData } from "../../../../FormContext";
-import ImgPicker from "../../../../components/ImgPicker";
-import BouncyCheckbox from "react-native-bouncy-checkbox";
-import CategoryPicker from "../../../../components/CategoryPicker";
-import { ArrowLeftIcon } from "react-native-heroicons/outline";
+import {
+  ArrowLeftIcon,
+  ChevronDoubleDownIcon,
+} from "react-native-heroicons/outline";
 
 export default function AddFormOne() {
   const router = useRouter();
 
-  const [sub, setSub] = useState(false);
   const [item, setItem] = useState({ name: "None" });
-  const [name, setName] = useState("");
-  const [weight, setWeight] = useState("");
+  const [err, setErr] = useState(false);
 
-  const [err, setErr] = useState({
-    name: false,
-    weight: false,
-    cat: false,
-    img: false,
+  const { state } = useFormData();
+
+  const [baseViewDimensions, setBaseViewDimensions] = useState({
+    width: 0,
+    height: 0,
   });
 
-  const { state, updateItem, updateCategories, updateImage } = useFormData();
+  const onBaseViewLayout = (event) => {
+    const { width, height } = event.nativeEvent.layout;
+    setBaseViewDimensions({ width, height });
+  };
 
   useEffect(() => {
     if (state.item) {
@@ -38,84 +33,25 @@ export default function AddFormOne() {
     }
   }, [state.item]);
 
-  useEffect(() => {
-    if (state.cat) {
-      const e = { ...err };
-      e.cat = false;
-      setErr(e);
-    }
-  }, [state.cat]);
-
-  const handleNext = () => {
-    // router.push("/form/two");
-
-    const error = { name: false, weight: false, cat: false, img: false };
-
-    if (!state.item || state.item?.name === "None") {
-      if (name.length === 0) error.name = true;
-
-      if (weight.length === 0) error.weight = true;
-
-      if (!state.cat) error.cat = true;
-
-      if (state.cat) {
-        let foundOne = false;
-        for (let i = 0; i < state.cat.length; i++) {
-          if (state.cat[i].ch) {
-            foundOne = true;
-            break;
-          }
-        }
-
-        if (!foundOne) error.cat = true;
-      }
-
-      if (!state.img) error.img = true;
-
-      if (state.img && state.cat && name.length > 0 && weight.length > 0) {
-        let catg = state.cat?.filter((c) => c.ch !== false);
-        catg = catg.map((c) => c.cat);
-
-        const getId = (str) => {
-          const arr = str.split(" ");
-          let id = "";
-
-          for (let i = 0; i < arr.length; i++) {
-            id = id + arr[i].substring(0, 3).toUpperCase();
-          }
-
-          return id;
-        };
-
-        const item = {
-          update: false,
-          id: getId(name), // calculate id
-          category: catg,
-          name: name.trim(),
-          weight: weight.trim(),
-          img: state.img,
-          created_at: new Date().toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          }),
-        };
-
-        //console.log(item);
-
-        updateItem(item);
-
-        router.push("/form/two");
+  const handleNext = (version) => {
+    if (version === "v1") {
+      if (!state.item || state.item?.name === "None") {
+        setErr(true);
       } else {
-        setErr(error);
+        router.push("/form/two");
       }
-    } else {
-      router.push("/form/two");
+    } else if (version === "v2") {
+      router.push("/form/oneV2");
     }
   };
 
   return (
-    <SafeAreaView style={{ backgroundColor: "white" }}>
+    <SafeAreaView
+      style={{
+        backgroundColor: "white",
+        height: "100%",
+      }}
+    >
       <ArrowLeftIcon
         size={30}
         style={{
@@ -123,163 +59,158 @@ export default function AddFormOne() {
           marginVertical: 10,
         }}
         color="black"
-        onPress={() => router.back()}
+        onPress={() => router.replace("/")}
       />
-      <View
-        style={{
-          marginHorizontal: 20,
-          gap: 25,
-          paddingTop: 20,
-          height: "100%",
-
-          padding: 10,
-        }}
-      >
+      <View>
         <View
           style={{
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: 10,
+            width: baseViewDimensions.width,
+            height: baseViewDimensions.height,
+            ...styles.overlay,
           }}
-        >
-          <Text style={{ fontWeight: 500, fontSize: 20 }}>Item: </Text>
-
-          <TouchableOpacity
-            style={{
-              height: 30,
-              width: "60%",
-              borderWidth: 1,
-              borderRadius: 10,
-              elevated: 10,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-            onPress={() => router.push("/form/itemModal")}
-          >
-            <Text>{item.name}</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Heading */}
+        ></View>
         <View
-          style={{ justifyContent: "center", alignItems: "center", gap: 10 }}
-        >
-          <Text>------------------------ OR -----------------------</Text>
-        </View>
-
-        {/* Bottom section */}
-
-        <View style={{ gap: 20 }}>
-          <Text>Enter details below (if item not found in above list)</Text>
-          {/* Text Input section */}
-          <View style={{ flexDirection: "row", gap: 20 }}>
-            <View
+          style={{
+            width: baseViewDimensions.width,
+            height: baseViewDimensions.height,
+            ...styles.overlay2,
+          }}
+        ></View>
+        <View style={styles.container} onLayout={onBaseViewLayout}>
+          <Text
+            style={{
+              fontWeight: 500,
+              fontSize: 40,
+              fontFamily: "serif",
+            }}
+          >
+            Select an Item
+          </Text>
+          <View style={styles.itemContainer}>
+            <TouchableOpacity
               style={{
-                width: "60%",
-                gap: 4,
+                ...styles.itemModal,
+                borderColor: err ? "red" : "black",
               }}
+              onPress={() => router.push("/form/itemModal")}
             >
-              <TextInput
-                value={name}
-                onChangeText={setName}
-                placeholder="Enter item name..."
-                style={{
-                  borderColor: err.name ? "red" : "black",
-                  borderWidth: 1,
-                  borderRadius: 5,
-                  padding: 5,
-                }}
-              />
-
-              {err.name && (
-                <Text style={{ color: "red", fontSize: 10 }}>
-                  * Enter item's name
-                </Text>
-              )}
-            </View>
-
-            <View
-              style={{
-                width: "35%",
-                gap: 4,
-              }}
-            >
-              <TextInput
-                value={weight}
-                onChangeText={setWeight}
-                style={{
-                  padding: 5,
-                  borderWidth: 1,
-                  borderRadius: 5,
-                  borderColor: err.weight ? "red" : "black",
-                }}
-                placeholder="Weight"
-              />
-              {err.weight && (
-                <Text style={{ color: "red", fontSize: 10 }}>
-                  * Enter item's weight
-                </Text>
-              )}
-            </View>
-          </View>
-
-          {/* Image Picker */}
-          <View>
-            <ImgPicker />
-            {err.img && (
-              <Text
-                style={{
-                  color: "red",
-                  fontSize: 10,
-                  marginTop: 10,
-                  marginHorizontal: 33,
-                }}
-              >
-                * Pick item's photo from the library
+              <Text numberOfLines={1} style={{ fontSize: 20 }}>
+                {item.name}
               </Text>
-            )}
+              {item.name === "None" && (
+                <ChevronDoubleDownIcon
+                  style={{ position: "absolute", right: 2 }}
+                  size={24}
+                  color="black"
+                />
+              )}
+            </TouchableOpacity>
           </View>
 
-          {/* Categories section */}
+          <View style={{ flexDirection: "row", justifyContent: "center" }}>
+            <TouchableOpacity
+              style={styles.buttonV1}
+              onPress={() => handleNext("v1")}
+            >
+              <Text style={{ color: "white" }}>Go to Next Step</Text>
+            </TouchableOpacity>
+          </View>
+
           <View
-            style={{
-              flexDirection: "row",
-              gap: 15,
-              alignItems: "center",
-            }}
+            style={{ justifyContent: "center", alignItems: "center", gap: 10 }}
           >
-            <Text style={{ fontFamily: "serif", fontSize: 15 }}>
-              Categories:{" "}
+            <Text style={{ fontFamily: "serif" }}>
+              ----------------------------- OR -----------------------------
             </Text>
-
-            <CategoryPicker />
           </View>
-          {err.cat && (
-            <Text style={{ color: "red", fontSize: 10 }}>
-              * Pick atleast one category
+
+          {/* Bottom Part*/}
+          <View style={{ alignItems: "center", gap: 10 }}>
+            <Text style={{ fontFamily: "serif", fontSize: 16 }}>
+              Can't find the item in the list?
             </Text>
-          )}
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "center",
-          }}
-        >
-          <TouchableOpacity
-            style={{
-              backgroundColor: "red",
-              paddingHorizontal: 20,
-              paddingVertical: 10,
-              borderRadius: 10,
-            }}
-            onPress={() => handleNext()}
-          >
-            <Text style={{ color: "white" }}>Go to Next Step</Text>
-          </TouchableOpacity>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+              }}
+            >
+              <TouchableOpacity
+                style={styles.buttonV2}
+                onPress={() => handleNext("v2")}
+              >
+                <Text style={{ color: "#d63c31" }}>Add your item</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
       </View>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    marginHorizontal: 20,
+    marginTop: 32,
+    gap: 25,
+    height: "100%",
+    padding: 10,
+    height: "75%",
+    borderWidth: 1,
+    borderRadius: 20,
+    backgroundColor: "white",
+    alignItems: "center",
+  },
+  overlay: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    borderWidth: 1,
+    borderRadius: 20,
+    backgroundColor: "white",
+    marginHorizontal: 20,
+    marginTop: 32,
+  },
+  overlay2: {
+    position: "absolute",
+    top: 5,
+    right: 5,
+    borderWidth: 1,
+    borderRadius: 20,
+    backgroundColor: "white",
+    marginHorizontal: 20,
+    marginTop: 32,
+  },
+  itemContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 10,
+  },
+  itemModal: {
+    height: 50,
+    width: "70%",
+    borderWidth: 1,
+    borderRadius: 10,
+    elevated: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    position: "relative",
+  },
+  buttonV1: {
+    backgroundColor: "#d63c31",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  buttonV2: {
+    backgroundColor: "white",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderColor: "#d63c31",
+    borderWidth: 1,
+  },
+});

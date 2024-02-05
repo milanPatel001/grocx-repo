@@ -5,8 +5,9 @@ import {
   getDocs,
   setDoc,
 } from "firebase/firestore";
-import { db } from "./firebaseConfig";
+import { db, storage } from "./firebaseConfig";
 import * as ImagePicker from "expo-image-picker";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 /* get info methods */
 
@@ -105,16 +106,7 @@ export async function handleFavoritesAddition(
   }
 }
 
-/* Extras */
-
-export function categoryColor(category) {
-  if (category === "Sweets") return "#D0312D";
-  else if (category === "Biscuits") return "#E3242B";
-  else if (category === "Snacks") return "#5DADE2";
-  else if (category === "Fruits") return "#8E44AD";
-  else if (category === "Drinks") return "#1ABC9C";
-}
-
+/* Image Methods */
 export async function pickImage(updateImage, setImage) {
   let result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -129,4 +121,39 @@ export async function pickImage(updateImage, setImage) {
     updateImage(result.assets[0].uri);
     setImage(result.assets[0].uri);
   }
+}
+
+export async function uploadImageAsync(uri, id) {
+  const blob = await new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.onload = function () {
+      resolve(xhr.response);
+    };
+    xhr.onerror = function (e) {
+      console.error(e);
+      reject(new TypeError("Network request failed"));
+    };
+    xhr.responseType = "blob";
+    xhr.open("GET", uri, true);
+    xhr.send(null);
+  });
+
+  const storageRef = ref(storage, "images/" + id);
+
+  await uploadBytes(storageRef, blob);
+
+  // We're done with the blob, close and release it
+  blob.close();
+
+  return await getDownloadURL(storageRef);
+}
+
+/* Extras */
+
+export function categoryColor(category) {
+  if (category === "Sweets") return "#D0312D";
+  else if (category === "Biscuits") return "#E3242B";
+  else if (category === "Snacks") return "#5DADE2";
+  else if (category === "Fruits") return "#8E44AD";
+  else if (category === "Drinks") return "#1ABC9C";
 }

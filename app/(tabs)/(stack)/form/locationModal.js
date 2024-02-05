@@ -34,7 +34,7 @@ export default function LocationModal() {
       d.push({ id: doc.id, ...doc.data() });
     });
 
-    console.log(d);
+    //console.log(d);
 
     setSearchData(d);
     //dispatch({ type: "UPDATE_HOME_DATA", payload: d });
@@ -51,7 +51,7 @@ export default function LocationModal() {
   };
 
   return (
-    <SafeAreaView style={styles.main}>
+    <View style={styles.main}>
       <View style={styles.searchWrapper}>
         <MagnifyingGlassIcon size={25} color={"black"} />
         <TextInput
@@ -90,7 +90,7 @@ export default function LocationModal() {
             </View>
           ))}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -110,6 +110,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     paddingHorizontal: 10,
     borderWidth: 1,
+    borderColor: "blue",
   },
   search: {
     borderRadius: 5,

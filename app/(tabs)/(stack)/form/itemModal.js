@@ -32,8 +32,10 @@ export default function ItemModal() {
   }, [state.homeData]);
 
   const handlePress = (item) => {
-    // console.log(item);
-    updateItem({ update: true, ...item });
+    const itemObj = { ...item };
+    itemObj["update"] = true;
+
+    updateItem(itemObj);
     router.back();
   };
 
@@ -90,11 +92,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     height: 60,
     position: "relative",
-
     alignItems: "center",
     backgroundColor: "white",
     paddingHorizontal: 10,
     borderWidth: 1,
+    borderColor: "blue",
   },
   search: {
     borderRadius: 5,

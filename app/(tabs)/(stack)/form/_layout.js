@@ -20,6 +20,14 @@ export default function Layout() {
             headerTitle: "Select an item",
           }}
         />
+        <Stack.Screen
+          name="locationModal"
+          options={{
+            presentation: "modal",
+            headerShown: true,
+            headerTitle: "Select a location",
+          }}
+        />
       </Stack>
     </FormProvider>
   );

@@ -68,8 +68,6 @@ export const FormProvider = ({ children }) => {
   };
 
   const updateCategories = (newData) => {
-    //console.log("Inside update cat");
-    //console.log(newData);
     dispatch({ type: "UPDATE_SELF_CATEGORIES", payload: newData });
   };
 
